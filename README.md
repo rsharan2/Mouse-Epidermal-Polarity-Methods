@@ -1,6 +1,6 @@
 # Mouse Epidermal Polarity Methods
 
-## As described in Tissue Morphogenesis: Methods and Protocols
+## As described in Methods in Evaluating Planar Cell Polarity in the Developing Mouse Epidermis in Molecular Biology-Tissue Morphogenesis
 
 ### ARTICHOC - Simplified method to analyze and display hair follicle orientation
 
