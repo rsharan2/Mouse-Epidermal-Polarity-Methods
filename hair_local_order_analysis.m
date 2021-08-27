@@ -17,6 +17,9 @@ function hair_local_order_analysis(vector_sheet,hair_image,radius)
 t = readtable(vector_sheet);
 I = imread(hair_image);
 
+x_offset = t.X(1) - .5;
+y_offset = t.Y(1) - .5;
+
 NN_all = rangesearch([t.X t.Y],[t.X t.Y],radius,'SortIndices',true);
 
 %order_calc = @(x) sum((cosd(t(x,:).Updated_Orientation(2:end) - t(x,:).Updated_Orientation(1))+1)./2)/(length(x)-1);
@@ -52,7 +55,7 @@ f = figure;
 ax1 = axes; 
 imshow(I,[]);
 hold on;
-s = pcolor(X'-5.5,Y'-9.5,C');
+s = pcolor(X'-x_offset,Y'-y_offset,C');
 s.FaceColor = 'flat';
 s.EdgeColor = 'none';
 quiver(t.X,t.Y,t.Updated_DX/2,t.Updated_DY/2,.5,'k');
@@ -76,7 +79,7 @@ f = figure;
 ax1 = axes;
 imshow(I,[]);
 hold on;
-s = pcolor(X'-5.5,Y'-9.5,C');
+s = pcolor(X'-x_offset,Y'-y_offsetC');
 colormap(hot)
 s.FaceColor = 'flat';
 s.EdgeColor = 'none';

@@ -19,6 +19,9 @@ t = readtable(vector_sheet);
 I = imread(hair_image);
 map = imread(bw_map);
 
+x_offset = t.X(1) - .5;
+y_offset = t.Y(1) - .5;
+
 map_i = zeros(size(map),'int8');
 map_i(map>0) = -1;
 map_i(map==0) = 1;
@@ -48,14 +51,14 @@ cmap = hsv2rgb(horzcat([(round(n/2):n)./n (0:round(n/2)-1)./n]', repelem(1, n+1)
 
 [~,fname,~] = fileparts(hair_image);
 [~,vs_fname,~] = fileparts(vector_sheet);
-updated_orientation = -(rad2deg(atan2(-rev_dy,rev_dx))-90)+90; %0 = west, 90 = north, 180 = east, 270 = south
+updated_orientation = -(rad2deg(atan2(rev_dy,rev_dx))-90)+90; %0 = west, 90 = north, 180 = east, 270 = south
 updated_orientation(updated_orientation<0) = updated_orientation(updated_orientation<0) + 360;
 updated_t = table(t.X,t.Y,t.Slice,rev_dx,rev_dy,updated_orientation,t.Coherency,t.Energy,'VariableNames',{'X','Y','Slice','Updated_DX','Updated_DY','Updated_Orientation','Coherencey','Energy'});
 writetable(updated_t,[vs_fname '_updated.xlsx']);
 
-X = reshape(t.X,[201 150]);
-Y = reshape(t.Y,[201 150]);
-C = reshape(updated_t.Updated_Orientation,[201 150]);
+X = reshape(t.X,[length(unique(t.X)) length(unique(t.Y))]);
+Y = reshape(t.Y,[length(unique(t.X)) length(unique(t.Y))]);
+C = reshape(updated_t.Updated_Orientation,[length(unique(t.X)) length(unique(t.Y))]);
 
 Y(end+1,:) = Y(end,:);
 Y(:,end+1) = Y(:,end)+12;
@@ -71,7 +74,7 @@ imshow(I,[],'Parent',ax1); hold on;
 axis off;
 ax2 = copyobj(ax1,f);
 axes(ax2);
-s = pcolor(X'-5.5,Y'-9.5,C');
+s = pcolor(X'-x_offset,Y'-y_offset,C');
 colormap(cmap)
 s.FaceColor = 'flat';
 s.EdgeColor = 'none';
@@ -100,7 +103,7 @@ imshow(I,[],'Parent',ax1); hold on;
 axis off;
 ax2 = copyobj(ax1,f);
 axes(ax2);
-s = pcolor(X-5.5,Y-9.5,C);
+s = pcolor(X-x_offset,Y-y_offset,C);
 colormap(cmap)
 s.FaceColor = 'flat';
 s.EdgeColor = 'none';
