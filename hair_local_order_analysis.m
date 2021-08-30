@@ -17,6 +17,11 @@ function hair_local_order_analysis(vector_sheet,hair_image,radius)
 t = readtable(vector_sheet);
 I = imread(hair_image);
 
+if ndims(I) == 2
+    I = ind2rgb(I,gray(single(intmax('uint8'))));
+end
+
+
 x_offset = t.X(1) - .5;
 y_offset = t.Y(1) - .5;
 
@@ -79,7 +84,7 @@ f = figure;
 ax1 = axes;
 imshow(I,[]);
 hold on;
-s = pcolor(X'-x_offset,Y'-y_offsetC');
+s = pcolor(X'-x_offset,Y'-y_offset,C');
 colormap(hot)
 s.FaceColor = 'flat';
 s.EdgeColor = 'none';

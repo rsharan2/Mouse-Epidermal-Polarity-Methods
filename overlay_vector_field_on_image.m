@@ -17,6 +17,11 @@ function overlay_vector_field_on_image(vector_sheet,hair_image,bw_map)
 
 t = readtable(vector_sheet);
 I = imread(hair_image);
+
+if ndims(I) == 2
+    I = ind2rgb(I,gray(single(intmax('uint8'))));
+end
+
 map = imread(bw_map);
 
 x_offset = t.X(1) - .5;
