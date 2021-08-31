@@ -7,7 +7,23 @@
 
 function Data=generate_exampledata(grid,angledist) 
 
+Rad3Over2 = sqrt(3) / 2;
+[X Y] = meshgrid(0:1:41);
+n = size(X,1);
 
+X = Rad3Over2 * X;
+Y = Y + repmat([0 0.5],[size(X,1) size(X,2)/2]);
+
+X_big = X*grid;
+Y_big = Y*grid;
+
+x_og = X_big(X_big <= 6000 & Y_big <= 2000);
+y_og = Y_big(X_big <= 6000 & Y_big <= 2000);
+
+x = x_og + 100.*rand(length(x_og),1) + 1;
+y = y_og + 100.*rand(length(y_og),1) + 1;
+
+%{
 % if desired, initiate random number geneator to keep consistent results
 % rng(1234,'twister');
 
@@ -32,7 +48,7 @@ y=(rand(length(mody),length(modx)).*mody(:,1) + mody(:,2))';
 
 % If regional differences are desired, select the third option below and then 
 % choose a split (x or y, and the proportion of the anterior region)
-
+%}
 % If a normal distribution of angles is desired, select the mean and stdev to 
 % describe this distribution and choose the frequency of downgrown follicles.
 
