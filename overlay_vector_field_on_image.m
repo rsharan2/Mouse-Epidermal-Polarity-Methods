@@ -19,7 +19,7 @@ t = readtable(vector_sheet);
 I = imread(hair_image);
 
 if ndims(I) == 2
-    I = ind2rgb(I,gray(single(intmax('uint8'))));
+    I = ind2rgb(imadjust(I),gray(single(intmax('uint16'))));
 end
 
 map = imread(bw_map);
@@ -32,8 +32,8 @@ map_i(map>0) = -1;
 map_i(map==0) = 1;
 
 indic = @(x,y,dx) dx*double(map_i(y,x));
-rev_dx = rowfun(indic,table(t.X,t.Y,t.DX),'OutputFormat','uniform');
-rev_dy = rowfun(indic,table(t.X,t.Y,t.DY),'OutputFormat','uniform');
+rev_dx = rowfun(indic,table(round(t.X-x_offset),round(t.Y-y_offset),t.DX),'OutputFormat','uniform');
+rev_dy = rowfun(indic,table(round(t.X-x_offset),round(t.Y-y_offset),t.DY),'OutputFormat','uniform');
 
 %{
 figure; 
@@ -123,8 +123,8 @@ colormap(ax1);
 colormap(ax2,cmap);
 caxis(ax2, [0 360]);
 axis off;
-colorbar
-colorbar('Ticks', [0,90,180,270,360], 'TickLabels', [-180,-90,0,90,180]);
+%colorbar
+%colorbar('Ticks', [0,90,180,270,360], 'TickLabels', [-180,-90,0,90,180]);
 
 exportgraphics(gcf,[fname '_colored_overlay.tif']);
 saveas(gcf,[fname '_colored_overlay.fig']);
