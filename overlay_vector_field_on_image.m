@@ -52,7 +52,7 @@ close all;
 
 n = 720;        % two colors defined per angle for an even distribution
 % offsets the hsv colormap to center 0° at cyan
-cmap = hsv2rgb(horzcat(((0:n)./n)', repelem(1, n+1)', repelem(1, n+1)'));  % 0° = cyan
+cmap = hsv2rgb(horzcat([(round(n/2):n)./n (0:round(n/2)-1)./n]', repelem(1, n+1)', repelem(1, n+1)'));  % 0° = cyan
 
 [~,fname,~] = fileparts(hair_image);
 [~,vs_fname,~] = fileparts(vector_sheet);
@@ -123,11 +123,16 @@ colormap(ax1);
 colormap(ax2,cmap);
 caxis(ax2, [0 360]);
 axis off;
-%colorbar
-%colorbar('Ticks', [0,90,180,270,360], 'TickLabels', [-180,-90,0,90,180]);
 
 exportgraphics(gcf,[fname '_colored_overlay.tif']);
 saveas(gcf,[fname '_colored_overlay.fig']);
+
+figure;
+colormap(cmap);
+caxis([0 360]);
+axis off;
+colorbar; colorbar('Ticks', [0,90,180,270,360], 'TickLabels', [-180,-90,0,90,180]);
+exportgraphics(gcf,[fname '_colormap.tif'])
 close all;
 
 end
