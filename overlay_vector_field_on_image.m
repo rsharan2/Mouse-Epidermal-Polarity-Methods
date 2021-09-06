@@ -16,6 +16,10 @@ function overlay_vector_field_on_image(vector_sheet,hair_image,bw_map)
 %overlay_vector_field_on_image('Vector field rst P4 18_05_18 M1072 n1.xlsx','18_05_18 M1072 1 P4 rst rst invert sharpen scaled to control.tif','test_map.tif')
 
 t = readtable(vector_sheet);
+
+rerun = any(strcmp('Updated_DX',t.Properties.VariableNames));
+
+
 I = imread(hair_image);
 
 if ndims(I) == 2
@@ -31,10 +35,22 @@ map_i = zeros(size(map),'int8');
 map_i(map>0) = -1;
 map_i(map==0) = 1;
 
-indic = @(x,y,dx) dx*double(map_i(y,x));
-rev_dx = rowfun(indic,table(round(t.X-x_offset),round(t.Y-y_offset),t.DX),'OutputFormat','uniform');
-rev_dy = rowfun(indic,table(round(t.X-x_offset),round(t.Y-y_offset),t.DY),'OutputFormat','uniform');
-
+if ~rerun
+    indic = @(x,y,dx) dx*double(map_i(y,x));
+    rev_dx = rowfun(indic,table(round(t.X-x_offset),round(t.Y-y_offset),t.DX),'OutputFormat','uniform');
+    rev_dy = rowfun(indic,table(round(t.X-x_offset),round(t.Y-y_offset),t.DY),'OutputFormat','uniform');
+else
+    disp('Rerun detected, using Flipped column to flip rather than input bw_map');
+    to_flip = [t.Flipped];
+    tb = table(t.Original_DX,to_flip);
+    rev_dx = (tb.Var2*-1 + ~(tb.Var2)*1).*tb.Var1;
+    
+    tb = table(t.Original_DY,to_flip);
+    rev_dy = (tb.Var2*-1 + ~(tb.Var2)*1).*tb.Var1;
+    
+    %rev_dx = arrayfun(@(x,flip) (flip*-1 + ~(flip)*1)*x,table(t.Updated_DX,to_flip));
+    %rev_dy = arrayfun(@(x,flip) (flip*-1 + ~(flip)*1)*x,table(t.Updated_DY,to_flip));
+end
 %{
 figure; 
 imshow(I,[])
@@ -58,7 +74,14 @@ cmap = hsv2rgb(horzcat([(round(n/2):n)./n (0:round(n/2)-1)./n]', repelem(1, n+1)
 [~,vs_fname,~] = fileparts(vector_sheet);
 updated_orientation = -(rad2deg(atan2(rev_dy,rev_dx))-90)+90; %0 = west, 90 = north, 180 = east, 270 = south
 updated_orientation(updated_orientation<0) = updated_orientation(updated_orientation<0) + 360;
-updated_t = table(t.X,t.Y,t.Slice,rev_dx,rev_dy,updated_orientation,t.Coherency,t.Energy,'VariableNames',{'X','Y','Slice','Updated_DX','Updated_DY','Updated_Orientation','Coherencey','Energy'});
+
+if ~rerun
+    is_flip = [rev_dx~=t.DX | rev_dy~=t.DY];
+    updated_t = table(t.X,t.Y,t.Slice,rev_dx,rev_dy,updated_orientation,is_flip,t.Coherency,t.Energy,t.DX,t.DY,t.Orientation,'VariableNames',{'X','Y','Slice','Updated_DX','Updated_DY','Updated_Orientation','Flipped','Coherency','Energy','Original_DX','Original_DY','Original_orientation'});
+else
+    is_flip = [rev_dx~=t.Original_DX | rev_dy~=t.Original_DY];
+    updated_t = table(t.X,t.Y,t.Slice,rev_dx,rev_dy,updated_orientation,is_flip,t.Coherency,t.Energy,t.Original_DX,t.Original_DY,t.Original_orientation,'VariableNames',{'X','Y','Slice','Updated_DX','Updated_DY','Updated_Orientation','Flipped','Coherency','Energy','Original_DX','Original_DY','Original_orientation'});
+end
 writetable(updated_t,[vs_fname '_updated.xlsx']);
 
 X = reshape(t.X,[length(unique(t.X)) length(unique(t.Y))]);
@@ -126,6 +149,10 @@ axis off;
 
 exportgraphics(gcf,[fname '_colored_overlay.tif']);
 saveas(gcf,[fname '_colored_overlay.fig']);
+E = imread([fname '_colored_overlay.tif']);
+I_r = imresize(E,'OutputSize',size(I,1:2));
+imwrite(I_r,[fname '_colored_overlay.tif']);
+
 
 figure;
 cmap2 = hsv2rgb(horzcat(((0:n)./n)', repelem(1, n+1)', repelem(1, n+1)'));
