@@ -28,8 +28,11 @@ end
 
 map = imread(bw_map);
 
-x_offset = t.X(end) - size(I,2) +1;
-y_offset = t.Y(end) - size(I,1) +1;
+x_offset = t.X(1) - .5;
+y_offset = t.Y(1) - .5;
+
+mask_x_offset = t.X(end) - size(I,2) +1;
+mask_y_offset = t.Y(end) - size(I,1) +1;
 
 map_i = zeros(size(map),'int8');
 map_i(map>0) = -1;
@@ -37,8 +40,8 @@ map_i(map==0) = 1;
 
 if ~rerun
     indic = @(x,y,dx) dx*double(map_i(y,x));
-    rev_dx = rowfun(indic,table(t.X-x_offset,t.Y-y_offset,t.DX),'OutputFormat','uniform');
-    rev_dy = rowfun(indic,table(t.X-x_offset,t.Y-y_offset,t.DY),'OutputFormat','uniform');
+    rev_dx = rowfun(indic,table(t.X-mask_x_offset,t.Y-mask_y_offset,t.DX),'OutputFormat','uniform');
+    rev_dy = rowfun(indic,table(t.X-mask_x_offset,t.Y-mask_y_offset,t.DY),'OutputFormat','uniform');
 else
     disp('Rerun detected, using Flipped column to flip rather than input bw_map');
     to_flip = [t.Flipped];
