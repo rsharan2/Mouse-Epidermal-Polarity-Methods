@@ -153,7 +153,7 @@ axis off;
 exportgraphics(gcf,[fname '_colored_overlay.tif']);
 saveas(gcf,[fname '_colored_overlay.fig']);
 E = imread([fname '_colored_overlay.tif']);
-I_r = imresize(E,'OutputSize',size(mask,1:2));
+I_r = imresize(E,'OutputSize',size(map,1:2));
 imwrite(I_r,[fname '_colored_overlay.tif']);
 
 
