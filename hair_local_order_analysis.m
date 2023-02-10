@@ -17,14 +17,6 @@ function hair_local_order_analysis(vector_sheet,hair_image,radius)
 t = readtable(vector_sheet);
 I = imread(hair_image);
 
-if ndims(I) == 2
-    I = ind2rgb(I,gray(single(intmax('uint8'))));
-end
-
-
-x_offset = t.X(1) - .5;
-y_offset = t.Y(1) - .5;
-
 NN_all = rangesearch([t.X t.Y],[t.X t.Y],radius,'SortIndices',true);
 
 %order_calc = @(x) sum((cosd(t(x,:).Updated_Orientation(2:end) - t(x,:).Updated_Orientation(1))+1)./2)/(length(x)-1);
@@ -32,13 +24,23 @@ NN_all = rangesearch([t.X t.Y],[t.X t.Y],radius,'SortIndices',true);
 
 %perform pairwise subtraction for each follicle in neighborhood for each
 %neighborhood
-order_prep = @(x) t(x,:).Updated_Orientation - t(x,:).Updated_Orientation';
-order_prep_out = cellfun(order_prep,NN_all,'UniformOutput',false);
 
-%perform rest of calcuations on the upper trianglular matrix excluding diagonal
-order_calc = @(A) mean((cosd(A(triu(true(size(A)),1)))+1)./2);
-order_param = cellfun(order_calc,order_prep_out);
+order_param = zeros(length(NN_all),1);
 
+parfor i=1:length(NN_all)
+    %{
+    order_prep = @(x) t(x,:).Updated_Orientation - t(x,:).Updated_Orientation';
+    order_prep_out = cellfun(order_prep,NN_all,'UniformOutput',false);
+    order_calc = @(A) mean((cosd(A(triu(true(size(A)),1)))+1)./2);
+    order_param = cellfun(order_calc,order_prep_out);
+    %}
+    curr_nn = NN_all{i};
+    order_prep_out = t(curr_nn,:).Updated_Orientation - t(curr_nn,:).Updated_Orientation';
+    
+    %perform rest of calcuations on the upper trianglular matrix excluding diagonal
+    order_calc = mean((cosd(order_prep_out(triu(true(size(order_prep_out)),1)))+1)./2);
+    order_param(i) = order_calc;
+end
 t.Local_Order = order_param;
 
 [~,vs_fname,~] = fileparts(vector_sheet);
@@ -60,7 +62,7 @@ f = figure;
 ax1 = axes; 
 imshow(I,[]);
 hold on;
-s = pcolor(X'-x_offset,Y'-y_offset,C');
+s = pcolor(X'-5.5,Y'-9.5,C');
 s.FaceColor = 'flat';
 s.EdgeColor = 'none';
 quiver(t.X,t.Y,t.Updated_DX/2,t.Updated_DY/2,.5,'k');
@@ -84,7 +86,7 @@ f = figure;
 ax1 = axes;
 imshow(I,[]);
 hold on;
-s = pcolor(X'-x_offset,Y'-y_offset,C');
+s = pcolor(X'-5.5,Y'-9.5,C');
 colormap(hot)
 s.FaceColor = 'flat';
 s.EdgeColor = 'none';
@@ -92,7 +94,8 @@ ax1.Visible = 'off';
 ax1.XTick = [];
 ax1.YTick = [];
 % Give each one its colormap
-colormap(hot);
+cmap = colorcet('L3');
+colormap(cmap);
 caxis([0 1]);
 axis off;
 %colorbar
